@@ -47,7 +47,8 @@ public class DatabaseManager {
         }
     }
 
-    // Método para buscar todos os nomes dos livros salvos
+    // --- ADICIONE ESTE MÉTODO QUE ESTAVA FALTANDO ---
+    // Método para buscar TODOS os livros cadastrados
     public static List<String> listarLivros() {
         List<String> livros = new ArrayList<>();
         String sql = "SELECT nome FROM livros";
@@ -65,6 +66,28 @@ public class DatabaseManager {
         return livros;
     }
 
+    // Método para buscar livros filtrados pelo nome
+    public static List<String> buscarLivrosPorNome(String termoBusca) {
+        List<String> livros = new ArrayList<>();
+        String sql = "SELECT nome FROM livros WHERE nome LIKE ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // O "%" antes e depois faz com que encontre qualquer parte do nome
+            pstmt.setString(1, "%" + termoBusca + "%");
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    livros.add(rs.getString("nome"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar livros: " + e.getMessage());
+        }
+        return livros;
+    }
+
     // Método para atualizar o progresso (pode ser usado futuramente)
     public static void atualizarProgresso(String nome, int progresso) {
         String sql = "UPDATE livros SET progresso = ? WHERE nome = ?";
@@ -78,6 +101,7 @@ public class DatabaseManager {
             System.out.println("Erro ao atualizar progresso: " + e.getMessage());
         }
     }
+
     // Método para buscar o caminho do PDF pelo nome do livro
     public static String buscarCaminhoLivro(String nome) {
         String sql = "SELECT caminho FROM livros WHERE nome = ?";

@@ -2,6 +2,7 @@ package my.project.digital_library;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField; // Importação necessária
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.List;
@@ -12,23 +13,42 @@ public class HelloController {
     private ListView<String> listaLivros;
 
     @FXML
+    private TextField campoBusca; // Ligação com o fx:id="campoBusca" do FXML
+
+    @FXML
     public void initialize() {
         carregarLivrosDoBanco();
         configurarCliqueNaLista();
+        configurarSistemaDeBusca(); // Ativa a busca em tempo real
     }
 
     private void carregarLivrosDoBanco() {
         List<String> livros = DatabaseManager.listarLivros();
+        listaLivros.getItems().clear(); // Limpa antes de adicionar para não duplicar
         listaLivros.getItems().addAll(livros);
     }
 
-    // Configura o evento de duplo clique na lista de livros
+    // Configura a busca em tempo real conforme o usuário digita
+    private void configurarSistemaDeBusca() {
+        campoBusca.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.trim().isEmpty()) {
+                // Se a barra de busca estiver vazia, mostra todos os livros
+                carregarLivrosDoBanco();
+            } else {
+                // Busca no banco os livros filtrados pelo termo digitado (newValue)
+                List<String> livrosFiltrados = DatabaseManager.buscarLivrosPorNome(newValue.trim());
+
+                // Atualiza visualmente a lista
+                listaLivros.getItems().clear();
+                listaLivros.getItems().addAll(livrosFiltrados);
+            }
+        });
+    }
+
     private void configurarCliqueNaLista() {
         listaLivros.setOnMouseClicked(event -> {
-            // Verifica se foi um clique duplo (2 cliques)
             if (event.getClickCount() == 2) {
                 String livroSelecionado = listaLivros.getSelectionModel().getSelectedItem();
-
                 if (livroSelecionado != null) {
                     abrirLivroNoNavegador(livroSelecionado);
                 }
@@ -37,22 +57,14 @@ public class HelloController {
     }
 
     private void abrirLivroNoNavegador(String nomeLivro) {
-        // 1. Busca o caminho do ficheiro guardado no SQLite
         String caminho = DatabaseManager.buscarCaminhoLivro(nomeLivro);
-
         if (caminho != null) {
             File arquivo = new File(caminho);
-
-            // Verifica se o arquivo ainda existe no computador do usuário
             if (arquivo.exists()) {
-                // Converte o caminho do arquivo para o formato de URI (ex: file:///C:/...)
                 String uri = arquivo.toURI().toString();
-
-                // Usa o HostServices da aplicação para abrir no navegador padrão do sistema
                 HelloApplication.getInstance().getHostServices().showDocument(uri);
-                System.out.println("A abrir: " + uri);
             } else {
-                System.out.println("Erro: O arquivo PDF não foi encontrado no caminho " + caminho);
+                System.out.println("Erro: Arquivo não encontrado.");
             }
         }
     }
@@ -70,7 +82,10 @@ public class HelloController {
             String caminhoAbsoluto = arquivoSelecionado.getAbsolutePath();
 
             DatabaseManager.salvarLivro(nomeLivro, caminhoAbsoluto);
-            listaLivros.getItems().add(nomeLivro);
+
+            // Após importar, se houver um filtro de busca ativo, limpa para mostrar o novo livro
+            campoBusca.clear();
+            carregarLivrosDoBanco();
         }
     }
 }
