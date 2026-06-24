@@ -1,8 +1,10 @@
 package my.project.digital_library;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField; // Importação necessária
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.TilePane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.List;
@@ -10,48 +12,72 @@ import java.util.List;
 public class HelloController {
 
     @FXML
-    private ListView<String> listaLivros;
+    private TilePane gridLivros; // Alterado de ListView para TilePane
 
     @FXML
-    private TextField campoBusca; // Ligação com o fx:id="campoBusca" do FXML
+    private TextField campoBusca;
+
+    @FXML
+    private Label labelTotalLivros;
 
     @FXML
     public void initialize() {
         carregarLivrosDoBanco();
-        configurarCliqueNaLista();
-        configurarSistemaDeBusca(); // Ativa a busca em tempo real
+        configurarSistemaDeBusca();
     }
 
     private void carregarLivrosDoBanco() {
-        List<String> livros = DatabaseManager.listarLivros();
-        listaLivros.getItems().clear(); // Limpa antes de adicionar para não duplicar
-        listaLivros.getItems().addAll(livros);
+        // Agora buscamos a lista completa de objetos (com id e nome) do banco
+        List<Livro> livros = DatabaseManager.listarLivrosCompletos();
+        renderizarGradeDeLivros(livros);
     }
 
-    // Configura a busca em tempo real conforme o usuário digita
+    private void renderizarGradeDeLivros(List<Livro> livros) {
+        gridLivros.getChildren().clear(); // Limpa a grade atual
+
+        if (labelTotalLivros != null) {
+            labelTotalLivros.setText(String.valueOf(livros.size()));
+        }
+
+        for (Livro livro : livros) {
+            // Criando o Quadrado (VBox)
+            VBox card = new VBox();
+            card.getStyleClass().add("book-card");
+            card.setPrefSize(140, 180); // Tamanho fixo do quadrado do livro
+            card.setSpacing(15);
+
+            // Se não há imagem, exibe o ID estilizado (ex: "ID: 1" ou "Livro 1")
+            Label placeholder = new Label("Livro " + livro.getId());
+            placeholder.getStyleClass().add("book-thumb-placeholder");
+
+            // Texto com o nome real do arquivo PDF
+            Label titulo = new Label(livro.getNome());
+            titulo.getStyleClass().add("book-title-label");
+            titulo.setWrapText(true); // Quebra a linha se o nome for grande
+            titulo.setMaxWidth(120);
+
+            // Adiciona os componentes dentro do quadrado
+            card.getChildren().addAll(placeholder, titulo);
+
+            // Configura o duplo clique para abrir o PDF
+            card.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    abrirLivroNoNavegador(livro.getNome());
+                }
+            });
+
+            // Adiciona o quadrado finalizado na nossa grade principal
+            gridLivros.getChildren().add(card);
+        }
+    }
+
     private void configurarSistemaDeBusca() {
         campoBusca.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == null || newValue.trim().isEmpty()) {
-                // Se a barra de busca estiver vazia, mostra todos os livros
                 carregarLivrosDoBanco();
             } else {
-                // Busca no banco os livros filtrados pelo termo digitado (newValue)
-                List<String> livrosFiltrados = DatabaseManager.buscarLivrosPorNome(newValue.trim());
-
-                // Atualiza visualmente a lista
-                listaLivros.getItems().clear();
-                listaLivros.getItems().addAll(livrosFiltrados);
-            }
-        });
-    }
-
-    private void configurarCliqueNaLista() {
-        listaLivros.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                String livroSelecionado = listaLivros.getSelectionModel().getSelectedItem();
-                if (livroSelecionado != null) {
-                    abrirLivroNoNavegador(livroSelecionado);
-                }
+                List<Livro> filtrados = DatabaseManager.buscarLivrosObjetosPorNome(newValue.trim());
+                renderizarGradeDeLivros(filtrados);
             }
         });
     }
@@ -83,7 +109,6 @@ public class HelloController {
 
             DatabaseManager.salvarLivro(nomeLivro, caminhoAbsoluto);
 
-            // Após importar, se houver um filtro de busca ativo, limpa para mostrar o novo livro
             campoBusca.clear();
             carregarLivrosDoBanco();
         }

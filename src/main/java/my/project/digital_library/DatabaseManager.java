@@ -47,7 +47,45 @@ public class DatabaseManager {
         }
     }
 
-    // --- ADICIONE ESTE MÉTODO QUE ESTAVA FALTANDO ---
+    // Método para carregar todos os livros com ID
+    public static List<Livro> listarLivrosCompletos() {
+        List<Livro> livros = new ArrayList<>();
+        String sql = "SELECT id, nome FROM livros";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                livros.add(new Livro(rs.getInt("id"), rs.getString("nome")));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar livros completos: " + e.getMessage());
+        }
+        return livros;
+    }
+
+    // Método para buscar livros filtrados por nome retornando Objetos Livro
+    public static List<Livro> buscarLivrosObjetosPorNome(String termoBusca) {
+        List<Livro> livros = new ArrayList<>();
+        String sql = "SELECT id, nome FROM livros WHERE nome LIKE ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, "%" + termoBusca + "%");
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    livros.add(new Livro(rs.getInt("id"), rs.getString("nome")));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar objetos livros: " + e.getMessage());
+        }
+        return livros;
+    }
+
     // Método para buscar TODOS os livros cadastrados
     public static List<String> listarLivros() {
         List<String> livros = new ArrayList<>();

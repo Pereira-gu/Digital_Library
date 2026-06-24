@@ -1,0 +1,111 @@
+/* Definições Gerais */
+.root {
+    -fx-background-color: #1a1a1d;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+/* Barra Superior */
+.header-section {
+    -fx-background-color: #25252b;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 5);
+}
+
+/* Botão Importar */
+.button-import {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 8 20;
+}
+.button-import:hover { -fx-background-color: #357abd; }
+
+/* Campo de Busca */
+.search-field {
+    -fx-background-color: #32323a;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888;
+    -fx-background-radius: 8;
+    -fx-border-color: #444;
+    -fx-border-radius: 8;
+    -fx-padding: 8;
+}
+
+/* Lista de Livros */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10;
+}
+
+.list-cell {
+    -fx-background-color: #25252b;
+    -fx-text-fill: #eee;
+    -fx-background-radius: 10;
+    -fx-margin: 5;
+    -fx-padding: 15;
+    -fx-font-size: 14px;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #32323a;
+    -fx-border-color: #4a90e2;
+    -fx-border-radius: 10;
+}
+
+.list-cell:selected {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+}
+
+/* Estilo do Quadrado/Card do Livro */
+.book-card {
+    -fx-background-color: #25252b;
+    -fx-background-radius: 12;
+    -fx-border-color: #333;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.book-card:hover {
+    -fx-background-color: #2d2d35;
+    -fx-border-color: #4a90e2;
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+/* O ID ou ícone temporário que fica no centro do quadrado */
+.book-thumb-placeholder {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4a90e2;
+}
+
+/* Nome do livro abaixo do ID */
+.book-title-label {
+    -fx-text-fill: #eee;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+    -fx-text-overrun: ellipsis; /* Transforma o final comprido em ... */
+    -fx-wrap-text: false;       /* Desativa a quebra abrupta de linha */
+}
+
+/* Customização das barras de scroll */
+.scroll-pane .thumb {
+    -fx-background-color: #32323a;
+    -fx-background-radius: 4;
+}
+.scroll-pane .thumb:hover {
+    -fx-background-color: #4a90e2;
+}
+.scroll-pane .track {
+    -fx-background-color: #1a1a1d;
+}
+.scroll-pane .increment-button, .scroll-pane .decrement-button {
+    -fx-background-color: transparent;
+}
