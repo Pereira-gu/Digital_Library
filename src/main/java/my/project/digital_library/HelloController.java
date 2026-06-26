@@ -8,6 +8,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.List;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public class HelloController {
 
@@ -71,14 +73,24 @@ public class HelloController {
         }
     }
 
+    // Criamos o temporizador com um atraso de 300 milissegundos
+    private final PauseTransition debounce = new PauseTransition(Duration.millis(300));
+
     private void configurarSistemaDeBusca() {
         campoBusca.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null || newValue.trim().isEmpty()) {
-                carregarLivrosDoBanco();
-            } else {
-                List<Livro> filtrados = DatabaseManager.buscarLivrosObjetosPorNome(newValue.trim());
-                renderizarGradeDeLivros(filtrados);
-            }
+            // Toda vez que o usuário digita, o temporizador reinicia
+            debounce.setOnFinished(event -> {
+                // Esse bloco só roda quando o usuário parar de digitar por 300ms
+                if (newValue == null || newValue.trim().isEmpty()) {
+                    carregarLivrosDoBanco();
+                } else {
+                    List<Livro> filtrados = DatabaseManager.buscarLivrosObjetosPorNome(newValue.trim());
+                    renderizarGradeDeLivros(filtrados);
+                }
+            });
+
+            // Dispara ou reinicia a contagem do zero
+            debounce.playFromStart();
         });
     }
 
